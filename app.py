@@ -1,286 +1,72 @@
+"""
+app.py — DiabetesVision (with Thermal Foot modules)
+====================================================
+Entry point. Adds two tabs to the existing DiabetesVision app:
+  - Foot Thermography (pages/thermal_foot.py)  — trained image model, AUC 0.878
+  - Risk Correlation  (pages/thermal_risk.py)  — trained risk models (neuropathy 0.931, PAD 0.825)
+
+Run:  streamlit run app.py
+"""
+
 import streamlit as st
 
-st.set_page_config(
-    page_title="DiabetesVision — AI Diabetes Screening",
-    page_icon="🩺",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="DiabetesVision", page_icon="🩺",
+                   layout="wide", initial_sidebar_state="collapsed")
 
-# ── GLOBAL CSS ────────────────────────────────────────────
+# --- Shared styling (matches existing DiabetesVision theme) ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-* { box-sizing: border-box; }
-
-.stApp {
-    background: #070D1A;
-    color: #E8EDF5;
-    font-family: 'DM Sans', sans-serif;
-}
-
-/* Hide default streamlit elements */
-#MainMenu, footer, header { visibility: hidden; }
-[data-testid="stSidebar"] { display: none; }
-
-/* Tab navigation styling */
-.stTabs [data-baseweb="tab-list"] {
-    background: #0D1526;
-    border-bottom: 1px solid #1E2D45;
-    padding: 0 2rem;
-    gap: 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: #7A8FA6;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    padding: 1rem 1.5rem;
-    border: none;
-    border-bottom: 2px solid transparent;
-}
-
-.stTabs [aria-selected="true"] {
-    color: #00D4AA !important;
-    border-bottom: 2px solid #00D4AA !important;
-    background: transparent !important;
-}
-
-/* Metric cards */
-[data-testid="stMetric"] {
-    background: #0D1526;
-    border: 1px solid #1E2D45;
-    border-radius: 12px;
-    padding: 1.2rem;
-}
-
-/* Buttons */
-.stButton > button {
-    background: linear-gradient(135deg, #00D4AA, #0099FF);
-    color: #070D1A;
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.7rem 2rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 212, 170, 0.3);
-}
-
-/* File uploader */
-[data-testid="stFileUploader"] {
-    border: 2px dashed #1E2D45;
-    border-radius: 12px;
-    background: #0D1526;
-    transition: border-color 0.2s;
-}
-
-[data-testid="stFileUploader"]:hover {
-    border-color: #00D4AA;
-}
-
-/* Progress bar */
-.stProgress > div > div {
-    background: linear-gradient(90deg, #00D4AA, #0099FF);
-    border-radius: 10px;
-}
-
-/* Stat cards */
-.stat-card {
-    background: linear-gradient(135deg, #0D1526, #0F1E35);
-    border: 1px solid #1E2D45;
-    border-radius: 16px;
-    padding: 2rem;
-    text-align: center;
-    transition: transform 0.2s, border-color 0.2s;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    border-color: #00D4AA;
-}
-
-.stat-number {
-    font-family: 'DM Serif Display', serif;
-    font-size: 3rem;
-    color: #00D4AA;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
-    color: #7A8FA6;
-    font-size: 0.9rem;
-    font-weight: 400;
-}
-
-/* Hero section */
-.hero {
-    padding: 5rem 2rem 3rem;
-    text-align: center;
-}
-
-.hero-badge {
-    display: inline-block;
-    background: rgba(0, 212, 170, 0.1);
-    border: 1px solid rgba(0, 212, 170, 0.3);
-    color: #00D4AA;
-    padding: 0.4rem 1.2rem;
-    border-radius: 100px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-}
-
-.hero-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2.5rem, 5vw, 4.5rem);
-    line-height: 1.1;
-    color: #E8EDF5;
-    margin-bottom: 1.5rem;
-}
-
-.hero-title span {
-    color: #00D4AA;
-    font-style: italic;
-}
-
-.hero-subtitle {
-    color: #7A8FA6;
-    font-size: 1.15rem;
-    max-width: 600px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.7;
-}
-
-/* Section headers */
-.section-header {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2rem;
-    color: #E8EDF5;
-    margin-bottom: 0.5rem;
-}
-
-.section-sub {
-    color: #7A8FA6;
-    margin-bottom: 2rem;
-}
-
-/* Problem/solution cards */
-.problem-card {
-    background: rgba(255, 80, 80, 0.05);
-    border: 1px solid rgba(255, 80, 80, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.solution-card {
-    background: rgba(0, 212, 170, 0.05);
-    border: 1px solid rgba(0, 212, 170, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.mode-card {
-    background: #0D1526;
-    border: 1px solid #1E2D45;
-    border-radius: 16px;
-    padding: 2.5rem;
-    text-align: center;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.mode-card:hover {
-    border-color: #00D4AA;
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.mode-icon { font-size: 3rem; margin-bottom: 1rem; }
-.mode-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: #E8EDF5;
-    margin-bottom: 0.5rem;
-}
-.mode-desc { color: #7A8FA6; font-size: 0.9rem; line-height: 1.6; }
-
-/* Use case cards */
-.usecase-card {
-    background: #0D1526;
-    border: 1px solid #1E2D45;
-    border-radius: 12px;
-    padding: 1.5rem;
-}
-
-.usecase-icon { font-size: 2rem; margin-bottom: 0.8rem; }
-.usecase-title { font-weight: 600; color: #E8EDF5; margin-bottom: 0.4rem; }
-.usecase-desc { color: #7A8FA6; font-size: 0.875rem; line-height: 1.6; }
-
-/* Divider */
-.divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #1E2D45, transparent);
-    margin: 3rem 0;
-}
-
-/* Result cards */
-.result-card {
-    background: #0D1526;
-    border: 1px solid #1E2D45;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin: 1rem 0;
-}
-
-/* Fix subheading label colors */
-label, .stTextInput label, .stNumberInput label, 
-.stSelectbox label, .stTextArea label, .stSlider label,
-.stFileUploader label {
-    color: #A0B0C5 !important;
-    font-size: 0.875rem !important;
-}
-
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+    html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
+    .stTabs [data-baseweb="tab"] { padding: 8px 20px; border-radius: 8px;
+        background: #0D1B2E; color: #7A8FA6; border: 1px solid #1E3A5F; }
+    .stTabs [aria-selected="true"] { background: #00D4AA22 !important;
+        color: #00D4AA !important; border-color: #00D4AA44 !important; }
+    [data-testid="stMetricValue"] { font-size: 1.8rem; color: #E8EDF5; }
+    .hero-badge { display:inline-block; background:#00D4AA22; color:#00D4AA;
+        border:1px solid #00D4AA44; border-radius:20px; padding:4px 16px;
+        font-size:0.8rem; font-weight:600; letter-spacing:0.08em;
+        text-transform:uppercase; margin-bottom:1.5rem; }
+    .section-header { font-size:2rem; font-weight:700; color:#E8EDF5; }
+    .usecase-card, .solution-card, .problem-card, .mode-card, .stat-card {
+        background:#0D1B2E; border:1px solid #1E3A5F; border-radius:12px; padding:1.5rem; }
+    .usecase-title { font-size:1.1rem; font-weight:600; color:#E8EDF5; }
+    .stat-number { font-size:2.5rem; font-weight:700; color:#00D4AA; }
+    .stat-label { color:#7A8FA6; font-size:0.875rem; }
+    .divider { border-top:1px solid #1E2D45; margin:3rem 0; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── TOP NAVBAR VIA TABS ───────────────────────────────────
-# Check session state for auto-tab switching from home buttons
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "pages"))
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "🏠  Home",
-    "🟢  Patient Screening",
-    "🔵  Doctor Dashboard",
-    "📊  About & Research"
+tabs = st.tabs([
+    "🏠 Home", "🙋 My Foot Check", "🟢 Patient Screening", "🔵 Doctor Dashboard",
+    "🌡️ Foot Thermography", "🦶 PAD & Ulcer", "⚡ Neuropathy",
+    "📊 Risk & CVD", "📋 Summary", "💚 Quality of Life", "📚 About & Research",
 ])
 
-with tab1:
-    from pages.home import run
-    run()
-
-with tab2:
-    from pages.patient_mode import run as patient_run
-    patient_run()
-
-with tab3:
-    from pages.doctor_mode import run as doctor_run
-    doctor_run()
-
-with tab4:
-    from pages.about import run as about_run
-    about_run()
+with tabs[0]:
+    import home; home.run()
+with tabs[1]:
+    import patient_intake; patient_intake.run()
+with tabs[2]:
+    import patient_mode; patient_mode.run()
+with tabs[3]:
+    import doctor_mode; doctor_mode.run()
+with tabs[4]:
+    import thermal_foot; thermal_foot.run()
+with tabs[5]:
+    import pad_ulcer_score; pad_ulcer_score.run()
+with tabs[6]:
+    import neuropathy_score; neuropathy_score.run()
+with tabs[7]:
+    import thermal_risk; thermal_risk.run()
+with tabs[8]:
+    import summary_report; summary_report.run()
+with tabs[9]:
+    import qol_proxy; qol_proxy.run()
+with tabs[10]:
+    import about; about.run()
+    import model_card; model_card.run()

@@ -1,148 +1,99 @@
+"""
+home.py — DiabetesVision landing page (global, self-contained styling)
+"""
 import streamlit as st
 
-def run():
 
-    # ── HERO ──────────────────────────────────────────────
+def run():
     st.markdown("""
-    <div class="hero">
-        <div class="hero-badge">🇮🇳 Built for India's Healthcare Gap</div>
-        <div class="hero-title">
-            Early Detection.<br>
-            <span>Clearer Vision. Longer Life.</span>
-        </div>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+      .dv-hero { text-align:center; padding:2.5rem 0 1rem; }
+      .dv-badge { display:inline-block; background:#00D4AA22; color:#00D4AA;
+        border:1px solid #00D4AA44; border-radius:20px; padding:5px 18px;
+        font-size:0.78rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase;
+        font-family:'DM Sans',sans-serif; margin-bottom:1.8rem; }
+      .dv-title { font-family:'DM Serif Display',serif; font-size:3.6rem; line-height:1.1;
+        color:#E8EDF5; margin:0 0 1.4rem; }
+      .dv-title .accent { color:#00D4AA; font-style:italic; display:block; }
+      .dv-sub { color:#7A8FA6; font-size:1.1rem; max-width:640px; margin:0 auto 1rem;
+        line-height:1.7; font-family:'DM Sans',sans-serif; }
+      .dv-stat { background:#0D1B2E; border:1px solid #1E3A5F; border-radius:14px;
+        padding:1.6rem 1rem; text-align:center; }
+      .dv-stat .n { font-family:'DM Serif Display',serif; font-size:2.4rem; color:#00D4AA; }
+      .dv-stat .l { color:#7A8FA6; font-size:0.85rem; margin-top:0.4rem; font-family:'DM Sans',sans-serif; }
+      .dv-h { font-family:'DM Serif Display',serif; font-size:2rem; color:#E8EDF5; margin:0 0 0.3rem; }
+      .dv-hs { color:#7A8FA6; font-size:0.95rem; margin-bottom:1.5rem; font-family:'DM Sans',sans-serif; }
+      .dv-card { background:#0D1B2E; border:1px solid #1E3A5F; border-radius:14px;
+        padding:1.5rem; height:100%; font-family:'DM Sans',sans-serif; }
+      .dv-card h4 { color:#E8EDF5; margin:0 0 0.6rem; font-size:1.1rem; font-weight:600; }
+      .dv-card p { color:#B0BEC5; line-height:1.7; margin:0; font-size:0.92rem; }
+      .dv-divider { border-top:1px solid #1E2D45; margin:3rem 0; }
+    </style>
+
+    <div class="dv-hero">
+      <div class="dv-badge">AI diabetic screening</div>
+      <div class="dv-title">Early Detection.<span class="accent">Clearer Vision. Healthier Feet.</span></div>
+      <p class="dv-sub">DiabetesVision brings specialist-level screening for the eye, skin and
+      foot into one place — combining deep-learning image models with foot thermography to
+      catch diabetic complications earlier, anywhere in the world.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <p style="text-align:center; color:#7A8FA6; font-size:1.15rem; 
-    max-width:600px; margin:0 auto 2.5rem; line-height:1.7; font-family:'DM Sans', sans-serif">
-        DiabetesVision uses deep learning to screen for Diabetic Retinopathy 
-        and skin-based diabetes indicators — making specialist-level diagnosis 
-        accessible at every primary health centre.
-    </p>
-    """, unsafe_allow_html=True)
-
-    # ── STATS ─────────────────────────────────────────────
-    col1, col2, col3, col4 = st.columns(4)
+    # ── Global stats ──────────────────────────────────────────────────────────
     stats = [
-        ("77M+", "Diabetics in India"),
-        ("1 in 3", "Will develop Retinopathy"),
-        ("70%", "Cases go undetected"),
-        ("₹500", "vs ₹5,000+ specialist visit"),
+        ("537M", "Adults living with diabetes worldwide"),
+        ("1 in 3", "Will develop diabetic retinopathy"),
+        ("~50%", "Develop peripheral neuropathy"),
+        ("~85%", "Of amputations begin as a foot ulcer"),
     ]
-    for col, (num, label) in zip([col1, col2, col3, col4], stats):
-        with col:
-            st.markdown(f"""
-            <div class="stat-card">
-                <div class="stat-number">{num}</div>
-                <div class="stat-label">{label}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    cols = st.columns(4)
+    for c, (n, l) in zip(cols, stats):
+        c.markdown(f'<div class="dv-stat"><div class="n">{n}</div><div class="l">{l}</div></div>',
+                   unsafe_allow_html=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="dv-divider"></div>', unsafe_allow_html=True)
 
-    # ── PROBLEM → SOLUTION ────────────────────────────────
-    st.markdown('<div class="section-header">The Problem</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-sub">Why 18 million Indians are at risk of preventable blindness</div>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="problem-card">
-            <h4 style="color:#FF6B6B; margin-top:0">🚨 The Screening Gap</h4>
-            <p style="color:#B0BEC5; line-height:1.8">
-            India has <strong style="color:#E8EDF5">1 ophthalmologist per 70,000 people</strong> 
-            in rural areas. Diabetic Retinopathy requires annual retinal screening — 
-            but most patients never receive one until it's too late.
-            </p>
-            <p style="color:#B0BEC5; line-height:1.8">
-            A specialist retinal screening costs <strong style="color:#E8EDF5">₹3,000–₹8,000</strong> 
-            at private clinics — unaffordable for 60% of diabetic patients in Tier 3 cities.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="solution-card">
-            <h4 style="color:#00D4AA; margin-top:0">✅ The DiabetesVision Solution</h4>
-            <p style="color:#B0BEC5; line-height:1.8">
-            A deep learning model trained on <strong style="color:#E8EDF5">10,000+ clinical images</strong> 
-            that grades Diabetic Retinopathy (0–4) with 85%+ accuracy — 
-            deployable on a basic tablet at any PHC.
-            </p>
-            <p style="color:#B0BEC5; line-height:1.8">
-            Every result includes a <strong style="color:#E8EDF5">Grad-CAM heatmap</strong> showing 
-            exactly which retinal region drove the diagnosis — 
-            making AI decisions explainable to clinicians.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
-    # ── WHO IS THIS FOR ───────────────────────────────────
-    st.markdown('<div class="section-header">Who Uses DiabetesVision</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-sub">Designed for three distinct healthcare contexts</div>', unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-    usecases = [
-        ("🏥", "Primary Health Centres", 
-         "Rural PHC staff upload retinal scans taken with low-cost fundus cameras. AI grades severity and flags urgent cases for specialist referral — no ophthalmologist on-site needed."),
-        ("🏨", "Private Clinics & Hospitals",
-         "Dermatologists and general physicians use the skin screening module for early diabetes indicators. Saves consultation time and provides documented AI-assisted evidence."),
-        ("🧑‍⚕️", "Diabetic Patients",
-         "Patients use the self-screening module to assess skin lesion risk between doctor visits. Plain-English results and clear next steps — no medical jargon.")
+    # ── The technology ────────────────────────────────────────────────────────
+    st.markdown('<div class="dv-h">The technology</div>', unsafe_allow_html=True)
+    st.markdown('<div class="dv-hs">Three complementary screening methods in one tool.</div>', unsafe_allow_html=True)
+    tech = [
+        ("Retinal & skin AI",
+         "MobileNetV2 deep-learning models grade diabetic retinopathy (0-4) from fundus "
+         "scans and flag concerning skin lesions, each with a Grad-CAM heatmap so clinicians "
+         "can see what drove the result."),
+        ("Foot thermography",
+         "Temperature-zone analysis of a foot photo. A warm foot points to autonomic "
+         "neuropathy; a cool foot points to poor circulation (PAD). One scan separates the "
+         "two — trained model AUC 0.88 for diabetic-foot detection."),
+        ("Risk & ulcer scoring",
+         "Thermal signs combine with HbA1c and risk factors to score neuropathy (AUC 0.93), "
+         "PAD (AUC 0.83), foot-ulcer risk and cardiovascular risk — turning a picture into "
+         "an action plan."),
     ]
+    cols = st.columns(3)
+    for c, (h, p) in zip(cols, tech):
+        c.markdown(f'<div class="dv-card"><h4>{h}</h4><p>{p}</p></div>', unsafe_allow_html=True)
 
-    for col, (icon, title, desc) in zip([col1, col2, col3], usecases):
-        with col:
-            st.markdown(f"""
-            <div class="usecase-card">
-                <div class="usecase-icon">{icon}</div>
-                <div class="usecase-title">{title}</div>
-                <div class="usecase-desc">{desc}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    st.markdown('<div class="dv-divider"></div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    # ── Two audiences ─────────────────────────────────────────────────────────
+    st.markdown('<div class="dv-h">Built for two audiences</div>', unsafe_allow_html=True)
+    st.markdown('<div class="dv-hs">The same evidence, presented for who is looking at it.</div>', unsafe_allow_html=True)
+    aud = [
+        ("For clinicians",
+         "Dedicated dashboards for retinal grading, foot thermography, PAD, neuropathy and "
+         "ulcer scoring, cardiovascular risk and a printable patient summary — with the "
+         "model confidence and reasoning shown alongside every result."),
+        ("For the public",
+         "A plain-language <b>My Foot Check</b>: enter a few details, add a photo or two, and "
+         "get simple advice plus a summary you can share with your care team. No medical "
+         "jargon, clear next steps."),
+    ]
+    cols = st.columns(2)
+    for c, (h, p) in zip(cols, aud):
+        c.markdown(f'<div class="dv-card"><h4>{h}</h4><p>{p}</p></div>', unsafe_allow_html=True)
 
-    # ── MODE SELECTOR ─────────────────────────────────────
-    st.markdown('<div class="section-header" style="text-align:center">Start Screening</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-sub" style="text-align:center">Choose your role to get started</div>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="mode-card">
-            <div class="mode-icon">🟢</div>
-            <div class="mode-title">Patient Screening</div>
-            <div class="mode-desc">
-                Upload a skin photo and answer a few questions. 
-                Get a plain-English risk assessment with AI heatmap 
-                and personalised next steps.
-            </div>
-            <br>
-            <div style="color:#00D4AA; font-weight:600; font-size:0.9rem; margin-top:1rem">
-                → Click <strong>🟢 Patient Screening</strong> tab above
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="mode-card">
-            <div class="mode-icon">🔵</div>
-            <div class="mode-title">Doctor Dashboard</div>
-            <div class="mode-desc">
-                Upload a retinal fundus scan for clinical DR grading (0–4), 
-                Grad-CAM explainability, confidence scores, 
-                and clinical recommendations.
-            </div>
-            <br>
-            <div style="color:#0099FF; font-weight:600; font-size:0.9rem; margin-top:1rem">
-                → Click <strong>🔵 Doctor Dashboard</strong> tab above
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="dv-divider"></div>', unsafe_allow_html=True)
+    st.caption("Research / pilot prototype. Decision-support only — not a diagnostic device, "
+               "and not a replacement for professional medical assessment.")
