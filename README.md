@@ -1,171 +1,133 @@
-# 🩺 DiabetesVision — AI-Powered Diabetes Screening
+# 🩺 DiabetesVision — AI Screening for Eye, Skin & Foot
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-2.19-orange?style=flat-square&logo=tensorflow)
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python)
 ![Streamlit](https://img.shields.io/badge/Streamlit-Deployed-red?style=flat-square&logo=streamlit)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-> **Early Detection. Clearer Vision. Longer Life.**
+> **Early Detection. Clearer Vision. Healthier Feet.**
 
-DiabetesVision is a dual-mode AI screening tool that detects signs of diabetes from medical imaging — making specialist-level diagnosis accessible at every primary health centre in India.
+DiabetesVision brings specialist-level screening for the three most common diabetic
+complications — **retinopathy** (eye), **skin** changes, and **foot** disease
+(neuropathy, peripheral arterial disease and ulceration) — into one tool, combining
+deep-learning image models with foot thermography and validated clinical risk scoring.
 
-🔗 **Live App:** [diabetesvision.streamlit.app](https://diabetesvision-gkdgxrf9c9fkdijqffbedu.streamlit.app)
-
----
-
-## 📸 Screenshots
-
-### Home — Problem & Solution
-![Home](screenshots/home.png)
-
-### Patient Screening — Skin Lesion Risk Assessment
-![Patient Mode](screenshots/patient.png)
-
-### Doctor Dashboard — Retinal DR Grading
-![Doctor Mode](screenshots/doctor.png)
-
-### Grad-CAM — Explainability
-![Grad-CAM](screenshots/gradcam.png)
+🔗 **Live app:** https://diabetesvision-cyixsu4gyaaufvpgclrbfp.streamlit.app/
 
 ---
 
-## 🧠 The Problem
+## ✨ What's inside
 
-India has **77 million diabetics** — the second highest in the world. Diabetic Retinopathy (DR) is the leading cause of preventable blindness, affecting 1 in 3 diabetic patients. Yet:
+Ten tabs, built for two audiences — clinicians and the public:
 
-- **70% of cases go undetected** due to lack of specialist access in rural areas
-- India has only **1 ophthalmologist per 70,000 people** in Tier 2/3 cities
-- A specialist retinal screening costs **₹3,000–₹8,000** — unaffordable for most
+| Tab | What it does |
+|-----|--------------|
+| 🏠 Home | Overview of the technology and who it's for |
+| 🙋 My Foot Check | Patient-facing self-check: enter details, add photos, get plain-language advice + a summary to share with a clinician |
+| 🟢 Patient Screening | Skin-lesion risk assessment with Grad-CAM heatmap |
+| 🔵 Doctor Dashboard | Retinal fundus grading (DR 0–4) with clinical recommendations |
+| 🌡️ Foot Thermography | Thermal foot analysis (multi-image); trained model flags diabetic-foot pattern |
+| 🦶 PAD & Ulcer | Peripheral arterial disease + foot-ulcer scoring with ABI referral logic |
+| ⚡ Neuropathy | Neuropathy model + MNSI symptom questionnaire + bedside exam |
+| 📊 Risk & CVD | Cardiovascular risk, complication radar, deterioration trajectory |
+| 📋 Summary | Consolidated, printable patient summary |
+| 💚 Quality of Life | Health-utility proxy from complication burden |
 
-DiabetesVision addresses this gap by deploying AI-powered screening at the point of care — no specialist required.
-
----
-
-## ✅ Solution
-
-Two deep learning models working in parallel:
-
-| Mode | Input | Model | Output |
-|------|-------|-------|--------|
-| 🟢 Patient Screening | Skin lesion photo | MobileNetV2 | Risk score (0–100) + Grad-CAM |
-| 🔵 Doctor Dashboard | Retinal fundus scan | MobileNetV2 | DR Grade (0–4) + Clinical recommendations |
+Enter a patient's details once (age, HbA1c, blood pressure…) and they **auto-fill across every tab**.
 
 ---
 
-## 🏗️ Model Architecture
+## 🧠 The technology
 
-### Model 1 — Skin Lesion Classifier
-- **Architecture:** MobileNetV2 (Transfer Learning + Fine-tuning)
-- **Dataset:** HAM10000 — 10,015 dermoscopy images
-- **Classes:** Concerning (melanoma, BCC, AKIEC) / Not Concerning
-- **Accuracy:** 85.07% validation accuracy
-- **Input Size:** 128 × 128 × 3
-- **Training:** Phase 1 (frozen base, 10 epochs) + Phase 2 (fine-tune last 30 layers, 20 epochs)
+**Deep-learning image models (MobileNetV2 + Grad-CAM).** Retinal DR grading and skin-lesion
+classification, each with a heatmap so clinicians can see what drove the result.
 
-### Model 2 — Retinal DR Grader
-- **Architecture:** MobileNetV2 (Transfer Learning + Fine-tuning)
-- **Dataset:** APTOS 2019 — 2,930 retinal fundus images
-- **Classes:** DR Grade 0 (No DR) → Grade 4 (Proliferative DR)
-- **Accuracy:** 70.6% validation accuracy
-- **Input Size:** 128 × 128 × 3
-- **Preprocessing:** CLAHE contrast enhancement
+**Foot thermography.** Temperature-zone analysis of a foot image. A *warm* foot points to
+early autonomic neuropathy (vasodilation); a *cool* foot points to poor circulation (PAD).
+One scan separates the two.
 
----
+**Risk scoring.** Thermal signs combine with HbA1c and clinical risk factors to score
+neuropathy, PAD, foot-ulcer risk and cardiovascular risk — turning an image into an action plan.
 
-## 🔥 Explainability — Grad-CAM
+### Model performance
 
-Every prediction includes a **Grad-CAM heatmap** showing which regions of the image influenced the AI's decision. This is critical for clinical adoption — doctors can verify the AI's reasoning rather than trusting a black-box result.
+| Model | Task | Data | Result |
+|-------|------|------|--------|
+| Skin lesion | Concerning vs not | HAM10000 (10,015 imgs) | 85.1% acc |
+| Retinal DR | DR grade 0–4 | APTOS 2019 | 70.6% acc |
+| Foot thermography | Control vs diabetic | ThermoDataBase (333 imgs, 167 patients) | **AUC 0.878** |
+| Neuropathy | Neuropathy present | 50k synthetic (test 7,502) | **AUC 0.931** |
+| PAD | PAD present | 50k synthetic (test 7,502) | **AUC 0.825** |
 
-Grad-CAM computes the gradient of the predicted class score with respect to the input image, producing a heatmap where:
-- 🔴 **Red/Yellow** = High influence regions
-- 🔵 **Blue** = Low influence regions
+The foot image model improved across three iterations (bilateral asymmetry 0.617 →
+full temperature features 0.865 → HSV zone features **0.878**), all with patient-grouped
+cross-validation.
 
 ---
 
-## 💼 Business Case
-
-| Metric | Value |
-|--------|-------|
-| Cost per AI screening | ₹200–500 |
-| Cost per specialist visit | ₹3,000–8,000 |
-| Screening speed | Seconds vs 30+ minutes |
-| Target market | 18M+ underserved diabetic patients in rural India |
-
-**Target users:**
-- 🏥 Primary Health Centres (PHCs) — rural DR screening without specialists
-- 🏨 Private Clinics — AI-assisted diagnosis for dermatologists and GPs
-- 🧑‍⚕️ Patients — self-screening between doctor visits
-
----
-
-## 🚀 Run Locally
+## 🚀 Run locally
 
 ```bash
-# Clone the repo
 git clone https://github.com/065010-AmanMalhi/diabetesvision.git
 cd diabetesvision
 
-# Create virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
+python -m venv venv          # use Python 3.12 (TensorFlow has no 3.13/3.14 builds yet)
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS/Linux
 
-# Install dependencies
 pip install -r requirements.txt
-
-# Run the app
-python -m streamlit run app.py
+streamlit run app.py
 ```
 
-> **Note:** Models are auto-downloaded from Google Drive on first run. Ensure you have an active internet connection.
+Opens at `http://localhost:8501`. The retinal/skin `.h5` models download on first run;
+the thermal `.pkl` models ship in the repo.
 
 ---
 
-## 📁 Project Structure
+## 📁 Project structure
 
 ```
 diabetesvision/
-├── app.py                  # Main entry point — tab navigation
+├── app.py                       # 10-tab entry point
+├── .streamlit/config.toml       # dark theme
 ├── pages/
-│   ├── home.py             # Landing page — problem/solution story
-│   ├── patient_mode.py     # Skin lesion screening
-│   ├── doctor_mode.py      # Retinal DR grading dashboard
-│   └── about.py            # Research & methodology
-├── models/                 # Auto-downloaded on first run
-│   ├── skin_model_best.h5
-│   └── retinal_model_full.h5
-├── requirements.txt
-└── README.md
+│   ├── home.py  about.py  patient_mode.py  doctor_mode.py
+│   ├── patient_intake.py        # My Foot Check (patient-facing)
+│   ├── thermal_foot.py          # foot thermography (AUC 0.878)
+│   ├── pad_ulcer_score.py       # PAD + ulcer scoring
+│   ├── neuropathy_score.py      # neuropathy + MNSI
+│   ├── thermal_risk.py          # CVD / prognosis
+│   ├── summary_report.py        # printable summary
+│   ├── qol_proxy.py             # quality-of-life proxy
+│   ├── model_card.py            # models & validation (under About)
+│   └── shared.py                # cross-tab autofill helper
+├── thermal_img_model.pkl
+├── thermal_risk_models.pkl
+└── requirements.txt
 ```
 
 ---
 
-## 📂 Datasets
+## 🔬 Datasets & references
 
-| Dataset | Source | Size |
-|---------|--------|------|
-| HAM10000 | [Kaggle](https://www.kaggle.com/datasets/kmader/skin-lesion-analysis-toward-melanoma-detection) | 10,015 images |
-| APTOS 2019 | [Kaggle](https://www.kaggle.com/competitions/aptos2019-blindness-detection) | 3,662 images |
-
----
-
-## 🛠️ Tech Stack
-
-- **Model Training:** TensorFlow / Keras, Google Colab (T4 GPU)
-- **Explainability:** Grad-CAM (input gradient saliency)
-- **Frontend:** Streamlit, Plotly
-- **Image Processing:** OpenCV, PIL
-- **Deployment:** Streamlit Cloud
+APTOS 2019 (retinal) · HAM10000 (skin) · ThermoDataBase (plantar thermal) ·
+synthetic thermal cohort (50,000, for risk-model prototyping). Clinical scores:
+IWGDF foot risk (Bus et al. 2020), UKPDS Risk Engine (Stevens et al. 2001),
+MNSI (Feldman et al. 1994), FINDRISC (Lindström & Tuomilehto 2003),
+EQ-5D utilities (Beaudet et al. 2014), Grad-CAM (Selvaraju et al. 2017).
 
 ---
 
 ## ⚠️ Disclaimer
 
-DiabetesVision is a screening tool intended to assist — not replace — medical professionals. All results should be reviewed by a qualified healthcare provider. This tool is not FDA/CE approved for clinical diagnosis.
+Research / pilot prototype. **Decision-support only — not a diagnostic device, not a
+replacement for professional medical assessment, and not CE/FDA approved.** The
+neuropathy, PAD and ulcer models are trained on synthetic data; the foot image model
+uses real images but a modest patient count. All outputs require clinician review and
+external validation on real, independently-labelled patients before any clinical use.
 
 ---
 
 ## 👨‍💻 Author
 
-**Aman Malhi**  
-Built as part of a deep learning project series covering CNN architecture.
+**Aman Malhi** — extended with foot thermography, PAD/neuropathy/ulcer scoring,
+a patient self-check, cross-tab autofill, and a printable summary.
