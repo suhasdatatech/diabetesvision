@@ -18,6 +18,10 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
     html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+    /* Hide Streamlit's auto-generated pages/ sidebar + its collapse control */
+    [data-testid="stSidebar"], [data-testid="stSidebarNav"],
+    [data-testid="collapsedControl"], [data-testid="stSidebarCollapseButton"] { display: none !important; }
+    section[data-testid="stSidebar"] { width: 0 !important; min-width: 0 !important; }
     .stTabs [data-baseweb="tab-list"] { gap: 8px; }
     .stTabs [data-baseweb="tab"] { padding: 8px 20px; border-radius: 8px;
         background: #0D1B2E; color: #7A8FA6; border: 1px solid #1E3A5F; }
